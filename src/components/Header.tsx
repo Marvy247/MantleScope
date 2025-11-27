@@ -48,8 +48,6 @@ export default function Header({ onSearch }: HeaderProps) {
 
             <AlertsPanel />
             
-            <appkit-button />
-            
             <motion.a
               href="https://github.com/yourusername/mantle-observatory"
               target="_blank"
