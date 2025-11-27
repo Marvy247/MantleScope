@@ -26,10 +26,19 @@ type Tab = "dashboard" | "analyzer";
 export default function Dashboard() {
   const { data: metrics } = useMetrics();
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (query: string) => {
+    if (query && query.startsWith("0x")) {
+      // If it looks like an address, switch to analyzer tab and set the query
+      setActiveTab("analyzer");
+      setSearchQuery(query);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-white">
-      <Header />
+      <Header onSearch={handleSearch} />
 
       {/* Navigation Tabs */}
       <div className="border-b border-zinc-800 bg-zinc-900/30 sticky top-[73px] z-40 backdrop-blur-xl">
@@ -163,7 +172,7 @@ export default function Dashboard() {
           <TransactionFeed />
         </motion.div>
       ) : (
-        <ContractAnalyzer />
+        <ContractAnalyzer initialAddress={searchQuery} onClearAddress={() => setSearchQuery("")} />
       )}
       </main>
     </div>

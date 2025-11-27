@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     config.externals.push("pino-pretty", "lokijs", "encoding");
     return config;
   },
+  // Add empty turbopack config to acknowledge webpack config
   turbopack: {},
 };
 

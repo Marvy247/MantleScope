@@ -5,10 +5,15 @@ import { Activity, Github } from "lucide-react";
 import AlertsPanel from "./AlertsPanel";
 import SearchBar from "./SearchBar";
 
-export default function Header() {
+interface HeaderProps {
+  onSearch?: (query: string) => void;
+}
+
+export default function Header({ onSearch }: HeaderProps) {
   const handleSearch = (query: string) => {
-    console.log("Search query:", query);
-    // Implement search logic here
+    if (onSearch) {
+      onSearch(query);
+    }
   };
 
   return (

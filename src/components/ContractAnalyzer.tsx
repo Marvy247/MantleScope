@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Shield, AlertTriangle, CheckCircle2, Zap, Code2, TrendingUp } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
@@ -27,14 +27,30 @@ interface ContractAnalysis {
   recentTransactions: number;
 }
 
-export default function ContractAnalyzer() {
-  const [address, setAddress] = useState("");
+interface ContractAnalyzerProps {
+  initialAddress?: string;
+  onClearAddress?: () => void;
+}
+
+export default function ContractAnalyzer({ initialAddress, onClearAddress }: ContractAnalyzerProps) {
+  const [address, setAddress] = useState(initialAddress || "");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ContractAnalysis | null>(null);
   const [error, setError] = useState("");
 
-  const analyzeContract = async () => {
-    if (!address) {
+  // Auto-analyze when initialAddress is provided
+  useEffect(() => {
+    if (initialAddress && initialAddress !== address) {
+      setAddress(initialAddress);
+      // Trigger analysis after a short delay
+      setTimeout(() => {
+        analyzeContractInternal(initialAddress);
+      }, 500);
+    }
+  }, [initialAddress]);
+
+  const analyzeContractInternal = async (addr: string) => {
+    if (!addr) {
       setError("Please enter a contract address");
       return;
     }
@@ -47,7 +63,7 @@ export default function ContractAnalyzer() {
       const response = await fetch("/api/contract/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ address }),
+        body: JSON.stringify({ address: addr }),
       });
 
       const data = await response.json();
@@ -58,11 +74,18 @@ export default function ContractAnalyzer() {
       }
 
       setResult(data);
+      if (onClearAddress) {
+        onClearAddress();
+      }
     } catch (err) {
       setError("Failed to analyze contract. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const analyzeContract = async () => {
+    await analyzeContractInternal(address);
   };
 
   const getComplexityColor = (complexity: string) => {
@@ -113,6 +136,32 @@ export default function ContractAnalyzer() {
             {loading ? "Analyzing..." : "Analyze"}
           </Button>
         </div>
+
+        {/* Example Addresses */}
+        {!result && !loading && !error && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="mt-4"
+          >
+            <div className="text-xs text-zinc-500 mb-2">Try these Mantle contracts:</div>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { name: "USDT", addr: "0x201EBa5CC46D216Ce6DC03F6a759e8E766e956aE" },
+                { name: "WETH", addr: "0xdEAddEaDdeadDEadDEADDEAddEADDEAddead1111" },
+                { name: "USDC", addr: "0x09Bc4E0D864854c6aFB6eB9A9cdF58aC190D0dF9" },
+              ].map((example) => (
+                <button
+                  key={example.addr}
+                  onClick={() => setAddress(example.addr)}
+                  className="px-3 py-1.5 bg-zinc-800/50 hover:bg-zinc-700 border border-zinc-700 rounded-lg text-xs text-zinc-300 transition-colors"
+                >
+                  {example.name}: {example.addr.slice(0, 6)}...{example.addr.slice(-4)}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {error && (
           <motion.div

@@ -60,26 +60,27 @@ export default function SearchBar({ onSearch, placeholder = "Search transactions
         )}
       </div>
 
-      {query && isFocused && (
+      {query && isFocused && query.startsWith("0x") && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-zinc-800 rounded-lg p-4 shadow-2xl z-50"
         >
-          <div className="text-sm text-zinc-400 mb-2">Quick actions:</div>
+          <div className="text-sm text-zinc-400 mb-2">Detected address format:</div>
           <div className="space-y-2">
-            {[
-              { label: "View transaction", action: "tx" },
-              { label: "View address", action: "address" },
-              { label: "View block", action: "block" }
-            ].map((item) => (
-              <button
-                key={item.action}
-                className="w-full text-left px-3 py-2 rounded hover:bg-zinc-800 transition-colors text-white text-sm"
-              >
-                {item.label}: <span className="text-blue-400">{query}</span>
-              </button>
-            ))}
+            <button
+              onClick={() => {
+                onSearch(query);
+                setIsFocused(false);
+              }}
+              className="w-full text-left px-3 py-2 rounded hover:bg-zinc-800 transition-colors text-white text-sm flex items-center gap-2"
+            >
+              <Search className="w-4 h-4 text-blue-400" />
+              <span>Analyze contract: <span className="text-blue-400 font-mono">{query.slice(0, 10)}...{query.slice(-6)}</span></span>
+            </button>
+          </div>
+          <div className="text-xs text-zinc-500 mt-2">
+            Press Enter or click above to analyze
           </div>
         </motion.div>
       )}
