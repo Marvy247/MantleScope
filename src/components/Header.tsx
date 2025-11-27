@@ -31,7 +31,7 @@ export default function Header({ onSearch }: HeaderProps) {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                Mantle Observatory
+                MantleScope
               </h1>
               <p className="text-xs text-zinc-400">Real-time Network Intelligence</p>
             </div>

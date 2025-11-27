@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mantle Observatory - Real-time Network Monitoring",
+  title: "MantleScope - Real-time Network Monitoring",
   description: "Comprehensive observability platform for Mantle Network infrastructure",
 };
 
