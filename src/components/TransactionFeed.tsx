@@ -2,34 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { Activity, ArrowRight, ExternalLink } from "lucide-react";
-import { useEffect, useState } from "react";
-
-interface Transaction {
-  id: string;
-  hash: string;
-  from: string;
-  to: string;
-  value: string;
-  gas: string;
-  timestamp: number;
-  type: "transfer" | "contract" | "swap";
-}
-
-const generateMockTransaction = (): Transaction => {
-  const types: Transaction["type"][] = ["transfer", "contract", "swap"];
-  const type = types[Math.floor(Math.random() * types.length)];
-  
-  return {
-    id: Math.random().toString(36).substring(7),
-    hash: `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
-    from: `0x${Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
-    to: `0x${Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`,
-    value: (Math.random() * 10).toFixed(4),
-    gas: (Math.random() * 0.1).toFixed(6),
-    timestamp: Date.now(),
-    type
-  };
-};
+import { useTransactions } from "@/hooks/useTransactions";
 
 const typeColors = {
   transfer: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/30" },
@@ -38,23 +11,8 @@ const typeColors = {
 };
 
 export default function TransactionFeed() {
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-
-  useEffect(() => {
-    // Initialize with some transactions
-    const initial = Array.from({ length: 5 }, () => generateMockTransaction());
-    setTransactions(initial);
-
-    // Add new transaction every 2-4 seconds
-    const interval = setInterval(() => {
-      setTransactions(prev => {
-        const newTx = generateMockTransaction();
-        return [newTx, ...prev].slice(0, 10);
-      });
-    }, Math.random() * 2000 + 2000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const { data: txData } = useTransactions(10);
+  const transactions = txData?.transactions || [];
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -92,7 +50,7 @@ export default function TransactionFeed() {
             
             return (
               <motion.div
-                key={tx.id}
+                key={tx.hash}
                 initial={{ opacity: 0, height: 0, y: -20 }}
                 animate={{ opacity: 1, height: "auto", y: 0 }}
                 exit={{ opacity: 0, height: 0 }}

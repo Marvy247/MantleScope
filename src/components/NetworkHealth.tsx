@@ -1,22 +1,8 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Shield, AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-
-interface HealthMetric {
-  name: string;
-  status: "healthy" | "warning" | "critical";
-  value: string;
-  description: string;
-}
-
-const healthMetrics: HealthMetric[] = [
-  { name: "Uptime", status: "healthy", value: "99.98%", description: "Last 30 days" },
-  { name: "Block Production", status: "healthy", value: "Normal", description: "2.1s avg time" },
-  { name: "Validator Set", status: "healthy", value: "Active", description: "127/127 online" },
-  { name: "Memory Pool", status: "warning", value: "High", description: "2,847 pending" },
-  { name: "Finality", status: "healthy", value: "Fast", description: "< 1s confirmation" }
-];
+import { Shield, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useHealth } from "@/hooks/useHealth";
 
 const statusConfig = {
   healthy: {
@@ -40,8 +26,9 @@ const statusConfig = {
 };
 
 export default function NetworkHealth() {
-  const overallHealth = healthMetrics.filter(m => m.status === "healthy").length;
-  const healthPercentage = (overallHealth / healthMetrics.length) * 100;
+  const { data: healthData } = useHealth();
+  const healthPercentage = parseFloat(healthData?.overallHealth || "0");
+  const healthMetrics = healthData?.health || [];
 
   return (
     <motion.div

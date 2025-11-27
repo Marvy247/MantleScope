@@ -2,28 +2,13 @@
 
 import { motion } from "framer-motion";
 import { BarChart3, TrendingUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { usePerformance } from "@/hooks/usePerformance";
 
 export default function PerformanceChart() {
-  const [dataPoints, setDataPoints] = useState<number[]>([]);
-
-  useEffect(() => {
-    // Generate initial random data
-    const initial = Array.from({ length: 24 }, () => Math.floor(Math.random() * 60) + 40);
-    setDataPoints(initial);
-
-    // Simulate real-time updates
-    const interval = setInterval(() => {
-      setDataPoints(prev => {
-        const newData = [...prev.slice(1), Math.floor(Math.random() * 60) + 40];
-        return newData;
-      });
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const maxValue = Math.max(...dataPoints, 100);
+  const { data: performanceData } = usePerformance(24);
+  const dataPoints = performanceData?.dataPoints.map(d => d.tps) || [];
+  const stats = performanceData?.statistics;
+  const maxValue = stats?.maxTps || 100;
 
   return (
     <motion.div
@@ -73,12 +58,12 @@ export default function PerformanceChart() {
 
       <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-zinc-800">
         {[
-          { label: "Avg TPS", value: Math.floor(dataPoints.reduce((a, b) => a + b, 0) / dataPoints.length) },
-          { label: "Peak TPS", value: Math.max(...dataPoints) },
-          { label: "Min TPS", value: Math.min(...dataPoints) }
+          { label: "Avg TPS", value: stats?.avgTps || 0 },
+          { label: "Peak TPS", value: stats?.maxTps || 0 },
+          { label: "Min TPS", value: stats?.minTps || 0 }
         ].map((stat) => (
           <div key={stat.label} className="text-center">
-            <div className="text-2xl font-bold text-white">{stat.value}</div>
+            <div className="text-2xl font-bold text-white">{stat.value.toLocaleString()}</div>
             <div className="text-xs text-zinc-400 mt-1">{stat.label}</div>
           </div>
         ))}

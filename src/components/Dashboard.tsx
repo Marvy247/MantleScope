@@ -1,12 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Activity, Layers, Zap, Database, TrendingUp, AlertCircle } from "lucide-react";
+import { Activity, Layers, Zap, Database, TrendingUp, BarChart3, Code2 } from "lucide-react";
+import { useState } from "react";
 import MetricCard from "./MetricCard";
 import TransactionFeed from "./TransactionFeed";
 import NetworkHealth from "./NetworkHealth";
 import PerformanceChart from "./PerformanceChart";
+import ContractAnalyzer from "./ContractAnalyzer";
 import Header from "./Header";
+import { useMetrics } from "@/hooks/useMetrics";
 
 const container = {
   hidden: { opacity: 0 },
@@ -18,12 +21,52 @@ const container = {
   }
 };
 
+type Tab = "dashboard" | "analyzer";
+
 export default function Dashboard() {
+  const { data: metrics } = useMetrics();
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-zinc-900 to-black text-white">
       <Header />
+
+      {/* Navigation Tabs */}
+      <div className="border-b border-zinc-800 bg-zinc-900/30 sticky top-[73px] z-40 backdrop-blur-xl">
+        <div className="container mx-auto px-6">
+          <div className="flex gap-1">
+            {[
+              { id: "dashboard" as Tab, label: "Dashboard", icon: BarChart3 },
+              { id: "analyzer" as Tab, label: "Contract Analyzer", icon: Code2 },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`relative flex items-center gap-2 px-6 py-4 transition-colors ${
+                    activeTab === tab.id
+                      ? "text-blue-400"
+                      : "text-zinc-400 hover:text-zinc-300"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="font-medium">{tab.label}</span>
+                  {activeTab === tab.id && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-400"
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
       
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-6 py-8">{activeTab === "dashboard" ? (
         <motion.div
           variants={container}
           initial="hidden"
@@ -34,36 +77,36 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <MetricCard
               title="Network TPS"
-              value="2,847"
-              change="+12.5%"
+              value={metrics?.tps.value.toLocaleString() || "0"}
+              change={`${metrics?.tps.change}%` || "0%"}
               icon={<Zap className="w-5 h-5" />}
-              trend="up"
+              trend={parseFloat(metrics?.tps.change || "0") >= 0 ? "up" : "down"}
               color="blue"
             />
             <MetricCard
               title="Gas Price"
-              value="0.023"
-              change="-5.2%"
+              value={metrics?.gasPrice.value || "0"}
+              change={`${metrics?.gasPrice.change}%` || "0%"}
               unit="GWEI"
               icon={<TrendingUp className="w-5 h-5" />}
-              trend="down"
+              trend={parseFloat(metrics?.gasPrice.change || "0") >= 0 ? "up" : "down"}
               color="green"
             />
             <MetricCard
               title="Active Contracts"
-              value="15,234"
-              change="+3.8%"
+              value={metrics?.activeContracts.value.toLocaleString() || "0"}
+              change={`${metrics?.activeContracts.change}%` || "0%"}
               icon={<Activity className="w-5 h-5" />}
-              trend="up"
+              trend={parseFloat(metrics?.activeContracts.change || "0") >= 0 ? "up" : "down"}
               color="purple"
             />
             <MetricCard
               title="DA Layer Size"
-              value="847.2"
-              change="+8.1%"
+              value={metrics?.daLayerSize.value || "0"}
+              change={`${metrics?.daLayerSize.change}%` || "0%"}
               unit="MB"
               icon={<Database className="w-5 h-5" />}
-              trend="up"
+              trend={parseFloat(metrics?.daLayerSize.change || "0") >= 0 ? "up" : "down"}
               color="orange"
             />
           </div>
@@ -119,6 +162,9 @@ export default function Dashboard() {
           {/* Recent Transactions */}
           <TransactionFeed />
         </motion.div>
+      ) : (
+        <ContractAnalyzer />
+      )}
       </main>
     </div>
   );
