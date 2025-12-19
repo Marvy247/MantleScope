@@ -10,7 +10,7 @@ plan:
       transactions:
         - contract-publish:
             contract-name: yield-aggregator
-            expected-sender: SP10AV6ZRH0537VM487K0KNCPPCSWG1H3C14FF6YW
+            expected-sender: SP19ZX95NXRTETF3K5B6DVWCJ569YSQXP2F6VZGCF
             cost: 74400
             path: contracts/yield-aggregator.clar
             anchor-block-only: true
