@@ -1,0 +1,18 @@
+---
+id: 0
+name: Mainnet deployment
+network: mainnet
+stacks-node: "https://stacks-node-api.mainnet.stacks.co"
+bitcoin-node: "http://blockstack:blockstacksystem@bitcoin.blockstack.com:8332"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: yield-aggregator
+            expected-sender: SP10AV6ZRH0537VM487K0KNCPPCSWG1H3C14FF6YW
+            cost: 74400
+            path: contracts/yield-aggregator.clar
+            anchor-block-only: true
+            clarity-version: 2
+      epoch: "2.4"
